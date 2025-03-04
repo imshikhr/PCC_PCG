@@ -1,0 +1,35 @@
+1. cutomer ID : 
+2. Application ID
+3. licensing:
+4. metallb.universe.tf/address-pool -- as per IP plannig
+5. namfnotification-ipv6:
+        annotations:
+          metallb.universe.tf/address-pool: smf-nsmf-service
+          metallb.universe.tf/allow-shared-ip: smf-nsmf-service       -- smf-nsmf-service: this name is should be as per IP planning
+		  
+6.    service:
+      externalIPv6:
+        loadBalancerIP: 2401:4900:90:1000::9c3                        -- Change IP as per IP planning
+
+7.      syslog:
+        remoteHosts:
+          - host: 2401:4900:0024:0506::10 		######syslog IP update IP 
+            port: '6514'
+            sourcehost: MPGVPRHCK01ERPCCSM01    ###Need to update name 
+          - host: 2401:4900:90:1000::9c7 		###### alog IP update
+            port: '514'
+            sourcehost: MPGVPRHCK01ERPCCSM01    ###Need to update name 
+
+8. ingress:
+      enabled: true
+      hostname: mpgvprhck01erpccsm01.cnom.5gc.mnc093.mcc404.3gppnetwork.org   ######Cnom host name
+	  
+	  
+9. staticConfig:
+    eventReporting:
+      streamConsumer:
+        - name: Central-CNOM
+          address: 2401:4900:0024:0400::8054       ##Need to update CNOM IP 
+          port: 10003								 ##Need to update CNOM port
+          domain:
+            - "pc-sm"
