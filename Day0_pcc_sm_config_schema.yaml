@@ -1,0 +1,723 @@
+################################################################################
+#MP GVP PCC-SM01, version: 1.33                                                     #
+################################################################################
+
+global:
+  ericsson:
+    licensing:
+      licenseDomains:
+        - productType: 
+          customerId: 
+          swltId: 
+  applicationId: 
+  timezone: Asia/Kolkata
+  licensing:
+    sites:
+      - hostname: 'uppal.nels'
+        ip: 2401:4900:d4:1600::0a14
+        priority: 30
+      - hostname: 'vijaywada.nels'
+        ip: 2401:4900:d4:1700::05ee
+        priority: 50
+  sm:
+    smf:
+      enabled: true
+    sgw:
+      enabled: true
+    pgw:
+      enabled: true
+  internalIPFamily: IPv4
+  externalIPv4:
+    enabled: false
+  externalIPv6:
+    enabled: false
+  openshift: true
+  security:
+    createPolicyRole: true
+    policyName: restricted-pod-security-policy
+    policyNameForAdp: adp-pod-security-policy
+  probe:
+    enabled: true
+  nodeSelector:
+    eric-pod: "paco"
+eric-pc-mm:
+  enabled: false
+eric-pc-sm:
+  eric-pc-sm-controller:
+    replicaCount: 2
+    resources:
+      ipallocator:
+        requests:
+          cpu: 1.1
+          memory: 2Gi    # as per resource max size pcc file
+        limits:
+          cpu: 1.1
+          memory: 2Gi    # as per resource max size pcc file
+    nodeSelector:
+      pcc-sm-pod: controller
+  eric-pc-sm-http-client:
+    replicaCount: 4
+    resources:
+      httpclient:
+        requests:
+          cpu: 1
+          memory: 2Gi
+        limits:
+          cpu: 1
+          memory: 2Gi
+    enabled-ipv4: "false"
+    enabled-ipv6: "true"
+    nodeSelector:
+      pcc-sm-pod: non-controller
+  eric-pc-sm-ip-allocator:
+    replicaCount: 1
+    resources:
+      ipallocator:
+        requests:
+          cpu: 1
+          memory: 8Gi
+        limits:
+          cpu: 1
+          memory: 8Gi
+    eventReporting:
+      maxConnections: 4
+      maxConnectionAgeInSeconds: 60
+    services:
+      x1:
+        annotations:
+          metallb.universe.tf/address-pool: "cac-networking-ip1"
+      liX1:
+        type: ClusterIP
+    nodeSelector:
+      pcc-sm-pod: non-controller
+    smfPgwScalingFactor: 4
+  eric-pc-sm-notification-forwarder:
+    replicaCount: 2
+    resources:
+      notifforwarder:
+        requests:
+          cpu: 1
+          memory: 2Gi
+        limits:
+          cpu: 1
+          memory: 2Gi
+    nodeSelector:
+      pcc-sm-pod: non-controller
+    services:
+      ipv4:
+        enabled: false
+      ipv6:
+        enabled: true
+      namfnotification-ipv6:
+        annotations:
+          metallb.universe.tf/address-pool: 
+          metallb.universe.tf/allow-shared-ip: 
+        type: LoadBalancer
+      nudmnotification-ipv6:
+        annotations:
+          metallb.universe.tf/address-pool: smf-nsmf-service
+          metallb.universe.tf/allow-shared-ip: smf-nsmf-service
+        type: LoadBalancer
+      npcfnotification-ipv6:
+        annotations:
+          metallb.universe.tf/address-pool: smf-nsmf-service
+          metallb.universe.tf/allow-shared-ip: smf-nsmf-service
+        type: LoadBalancer
+      nnrfnotification-ipv6:
+        annotations:
+          metallb.universe.tf/address-pool: smf-nsmf-service
+          metallb.universe.tf/allow-shared-ip: smf-nsmf-service
+        type: LoadBalancer
+        port: 7071
+      nchfnotification-ipv6:
+        annotations:
+          metallb.universe.tf/address-pool: smf-nsmf-service
+          metallb.universe.tf/allow-shared-ip: smf-nsmf-service
+        type: LoadBalancer
+      nsmfnotification-ipv6:
+        annotations:
+          metallb.universe.tf/address-pool: smf-nsmf-service
+          metallb.universe.tf/allow-shared-ip: smf-nsmf-service
+        type: LoadBalancer
+      nnrfnotification:
+        port: 7071
+  eric-pc-sm-nsmf-forwarder:
+    replicaCount: 4
+    resources:
+      nsmfforwarder:
+        requests:
+          cpu: 1
+          memory: 2Gi
+        limits:
+          cpu: 1
+          memory: 2Gi
+    nodeSelector:
+      pcc-sm-pod: non-controller
+    services:
+      ipv4:
+        enabled: false
+      ipv6:
+        enabled: true
+      nsmf-ipv6:
+        annotations:
+          metallb.universe.tf/address-pool: smf-nsmf-service
+          metallb.universe.tf/allow-shared-ip: smf-nsmf-service
+        type: LoadBalancer
+  eric-pc-sm-udp-forwarder:
+    replicaCount: 28
+    resources:
+      udpforwarder:
+        requests:
+          cpu: 1
+          memory: 2Gi
+        limits:
+          cpu: 1
+          memory: 2Gi
+    services:
+      gns5s8:
+        type: ClusterIP
+      ga:
+        type: ClusterIP
+      s4s11:
+        type: ClusterIP
+      s5s8:
+        type: ClusterIP
+      sxa:
+        type: ClusterIP
+      sxb:
+        type: ClusterIP
+    nodeSelector:
+      pcc-sm-pod: non-controller
+  eric-pc-sm-sgw-session:
+    replicaCount: 36
+    resources:
+      sgw:
+        requests:
+          cpu: 4
+          memory: 2Gi
+        limits:
+          cpu: 4
+          memory: 2Gi
+    eventReporting:
+      maxConnections: 4
+      maxConnectionAgeInSeconds: 60
+    nodeSelector:
+      pcc-sm-pod: non-controller
+  eric-pc-sm-smf-pgw-session:
+    replicaCount: 18
+    resources:
+      smf:
+        requests:
+          cpu: 4
+          memory: 8Gi
+        limits:
+          cpu: 4
+          memory: 8Gi
+    eventReporting:
+      maxConnections: 4
+      maxConnectionAgeInSeconds: 60
+    nodeSelector:
+      pcc-sm-pod: non-controller
+  eric-pc-sm-diameter:
+    replicaCount: 6
+    resources:
+      diameter:
+        requests:
+          cpu: 1
+          memory: 2Gi
+        limits:
+          cpu: 1
+          memory: 2Gi
+    nodeSelector:
+      pcc-sm-pod: non-controller
+  security:
+    policyName: restricted-pod-security-policy
+  eric-pc-sm-br-agent:
+    nodeSelector:
+      pcc-sm-pod: non-controller
+  eric-pc-sm-target-database-master-rd:
+    nodeSelector:
+      pcc-sm-pod: non-controller
+  eric-pc-sm-target-database-replica-rd:
+    nodeSelector:
+      pcc-sm-pod: non-controller
+eric-pc-vpn-gateway-forwarder:
+  replicaCount: 16
+  resources:
+    dataPlane:
+      limits:
+        cpu: 2
+        memory: 2Gi  # as per resource max size 
+  #annotations:                                                                                   
+  #  k8s.v1.cni.cncf.io/networks: ericmpgvprhck01erpccsm01/eric-pc-vpn-gateway-forwarder-net0@net0
+  allowNetworkConfigChanges: false
+  #interfaces:   
+  #  - {}        
+  kernelIo:
+    ipv6:
+      enabled: true
+  vpnGateway:
+    multiPod: true
+  interfaces:                      # Sync with VPN POD NAD Name "Network.Operator
+    - name: net0                   # Sync with VPN POD NAD Name
+      type: macvlan                # Sync with VPN POD NAD Name
+      hostInterface: bond2         # Sync with VPN POD NAD Name
+      networkAttachmentDefinition: false
+eric-pc-routing-engine:
+  resources:
+    eric-pc-routing-engine:
+      requests:
+        memory: 256Mi
+  interfaces:
+    type: predefine
+    predefineNetworks:
+      - name: eric-pc-routing-engine-net0 # Sync with CRE POD NAD Name "Network.Operator file"
+    cniNetPrefix: net
+eric-cloud-native-base:
+  eric-cm-mediator:
+    resources:
+      eric-cm-mediator:
+        requests:
+          memory: 512Mi
+        limits:
+          memory: 1Gi
+  eric-data-distributed-coordinator-ed:
+    resources:
+      dced:
+        requests:
+          memory: 800Mi
+        limits:
+          memory: 2Gi
+    enabled: true
+  eric-data-message-bus-kf:
+    resources:
+      messagebuskf:
+        requests:
+          cpu: '2'
+          memory: 2Gi
+  eric-data-object-storage-mn:
+    resources:
+      server:
+        requests:
+          cpu: 1100m
+          memory: 2Gi
+        limits:
+          cpu: 1100m
+          memory: 8Gi
+      kes:
+        limits:
+          memory: 400Mi
+        requests:
+          memory: 200Mi
+    nodeSelector:
+      pcc-sm-pod: non-controller
+    persistentVolumeClaim:
+      size: 500Gi
+  eric-data-search-engine:
+    replicaCount:
+      data: 6
+      ingest: 2
+      master: 3
+    resources:
+      data:
+        limits:
+          cpu: 3300m
+          memory: 10Gi
+      ingest:
+        limits:
+          cpu: 750m
+          memory: 4Gi
+      master:
+        limits:
+          memory: 2Gi
+    autoSetRequiredWorkerNodeSysctl: false
+    persistence:
+      data:
+        persistentVolumeClaim:
+          size: "72Gi"
+    jvmHeap:
+      data: 3072m
+      ingest: 2048m
+      master: 512m
+    index_management:
+      enabled: true
+      job_interval_in_minutes: 1
+      policies:
+        - description: "Delete indices older than 7 days (based on creation_date), for adp-app-logs and some legacy indices"
+          indices:
+            - pc-mm-*
+            - pc-sm-app-log*
+            - pc-routing-app*
+            - vpn-gw-app*
+            - pcc-kvdbrd-app-log*
+            - adp-app-logs*
+          priority: 1
+          states:
+            - name: init
+              transitions:
+                - condition: min_index_age=7d
+                  destination_state: delete
+            - name: delete
+              actions:
+                - delete
+        - description: "Delete indices older than 1 days (based on creation_date), for specific pc-mm legacy indices"
+          indices:
+            - pc-mm-worker-report-log*
+            - pc-mm-list-subscriber-result-log*
+            - pc-mm-gf-imeicheck-log*
+            - pc-mm-n17-pei-check-log*
+          priority: 2
+          states:
+            - name: init
+              transitions:
+                - condition: min_index_age=1d
+                  destination_state: delete
+            - name: delete
+              actions:
+                - delete
+        - description: "Delete indices older than 30 days (based on creation_date), for audit and alarm log indices"
+          indices:
+            - adp-app-audit-logs*
+            - adp-app-alarm-log*
+            - adp-app-asi-logs*
+          priority: 1
+          states:
+            - name: init
+              transitions:
+                - condition: min_index_age=30d
+                  destination_state: delete
+            - name: delete
+              actions:
+                - delete
+        - description: "Delete indices older than 60 days (based on creation_date), for ISP log indices"
+          indices:
+            - pcc-isp-log*
+            - isp-logs*
+          priority: 1
+          states:
+            - name: init
+              transitions:
+                - condition: min_index_age=60d
+                  destination_state: delete
+            - name: delete
+              actions:
+                - delete
+        - description: "Delete indices older than 1 day (based on creation_date), for debug log indices"
+          indices:
+            - adp-app-debug-logs*
+          priority: 1
+          states:
+            - name: init
+              transitions:
+                - condition: min_index_age=1d
+                  destination_state: delete
+            - name: delete
+              actions:
+                - delete
+      delete_indices_by_diskspace:
+        - index: pc*
+          size: 4gb
+        - index: adp-app-logs*
+          size: 111gb
+        - index: adp-app-a*
+          size: 3gb
+        - index: isp-logs*
+          size: 2gb
+        - index: adp-app-debug-logs*
+          size: 2gb
+  eric-fh-snmp-alarm-provider:
+    resources:
+      alarmprovider:
+        limits:
+          memory: 1024Mi
+    yang:
+      enabled: true
+      readConfigFromSecret: false
+    service:
+      externalIPv6:
+        loadBalancerIP: 2401:4900:90:1000::9c3
+        enabled: true
+        annotations:
+          addressPoolName: smf-oam
+#          metallb.universe.tf/address-pool: smf-oam
+#          metallb.universe.tf/allow-shared-ip: smf-oam
+          sharedVIPLabel: smf-oam
+        secretName: ""  ##Added asper KK
+  eric-log-transformer:
+    replicaCount: 5
+    resources:
+      logtransformer:
+        requests:
+          memory: 6Gi
+        limits:
+          cpu: 2
+          memory: 6Gi
+      metrics:
+        requests:
+          memory: 128Mi
+      tlsproxy:
+        requests:
+          memory: 128Mi
+    egress:
+      syslog:
+        remoteHosts:
+          - host: 
+            port: 
+            sourcehost:     
+          - host: 
+            port: 
+            sourcehost: 
+        tls:
+          enabled: false
+        certificates:
+          trustedCertificateListName: log-syslog-client
+          asymmetricKeyCertificateName: log-syslog-client
+        enabled: true
+        defaultSeverity: 6
+        filter: ruby { code => "event.set('message', event.get('[message]')+' '+event.get('[subject]').to_s || '-')" }
+        inclusions:
+          - field: "[facility]"
+            value: "log audit"
+          - field: "[facility]"
+            value: "security/authorization messages"
+          - field: "[metadata][category]"
+            contains: "-privacy-"
+        exclusions:
+          - logplane: 'null'
+            rules:
+              - field: "[extra_data][asi][log_plane]"
+                value: "alarm"
+    ensureOnceDelivery:
+      enabled: true
+    jvmHeap: 4096m
+  eric-odca-diagnostic-data-collector:
+    resources:
+      diagnostic-data-collector:
+        requests:
+          cpu: 1000m
+          memory: 1Gi
+          ephemeral-storage: 5Gi
+        limits:
+          cpu: 1500m
+          memory: 4Gi
+          ephemeral-storage: 20Gi
+  eric-pm-server:
+    resources:
+      eric-pm-server:
+        requests:
+          memory: 8000Mi
+        limits:
+          cpu: 4
+          memory: 12000Mi
+      eric-pm-exporter:
+        requests:
+          memory: 64Mi
+    rbac:
+      appMonitoring:
+        enabled: true
+        configFileCreate: true
+    server:
+      retention: 3d
+      configMapOverrideName: eric-pc-controller-pm-server-cfg
+      persistentVolume:
+        enabled: true
+        size: 144Gi
+      serviceAccountName: eric-pc-controller-pm-server
+      extraArgs:
+        query.lookback-delta: 15m
+  eric-si-application-sys-info-handler:
+    resources:
+      eric-si-application-sys-info-handler:
+        requests:
+          memory: 100Mi
+    asih:
+      applicationId: MPGVPRHCK01ERPCCSM01
+  eric-sec-key-management:
+    resources:
+      metrics:
+        limits:
+          memory: 300Mi
+  eric-lm-combined-server:
+    enabled: true
+  eric-log-shipper:
+    logshipper:
+      privileged: true
+  eric-sec-sip-tls:
+    resources:
+      sip-tls:
+        limits:
+          memory: 800Mi
+      sip-tls-supervisor:
+        limits:
+          memory: 800Mi
+
+  eric-tm-ingress-controller-cr:
+    enabled: true
+    ingressClass: OAM-IngressPCCSMClass
+    rbac:
+      create: true
+    service:
+      externalIPv4:
+        enabled: false
+#        loadBalancerIP: <Ingress Controller Service IPv4 address>
+      externalIPv6:
+        enabled: true
+        loadBalancerIP: 
+        annotations:
+          addressPoolName: smf-oam
+#          metallb.universe.tf/address-pool: smf-oam
+#          metallb.universe.tf/allow-shared-ip: smf-oam
+          sharedVIPLabel: smf-oam
+      externalTrafficPolicy: Cluster
+    clientCertificate:
+      enabled: true
+    envoyWorkloadMode:
+      daemonset:
+        enabled: false
+      deployment:
+        enabled: true
+        
+eric-cloud-native-nf-additions:
+  eric-pm-bulk-reporter:
+    resources:
+      bulkreporter:
+        requests:
+          memory: 200Mi
+    env:
+      iscompressed: true
+  eric-cm-yang-provider:
+    resources:
+      schemaSynchronizer:
+        requests:
+          memory: 128Mi
+      sshd:
+        requests:
+          memory: 256Mi
+      yangDbAdapter:
+        requests:
+          memory: 256Mi
+    service:
+      externalIPv6:
+        loadBalancerIP: 2401:4900:90:1000::9c3
+        enabled: true
+        annotations:
+          addressPoolName: smf-oam
+#          metallb.universe.tf/address-pool: smf-oam
+#          metallb.universe.tf/allow-shared-ip: smf-oam
+          sharedVIPLabel: smf-oam
+  eric-data-sftp-server:
+    service:
+      allocateLoadBalancerNodePorts: true
+      externalIPv6:
+        loadBalancerIP: 2401:4900:90:1000::9c3
+        enabled: true
+        annotations:
+          addressPoolName: smf-oam
+#          metallb.universe.tf/address-pool: smf-oam
+#          metallb.universe.tf/allow-shared-ip: smf-oam
+          sharedVIPLabel: smf-oam
+  eric-cnom-server:
+    enabled: true
+    resources:
+      server:
+        requests:
+          memory: 800Mi
+        limits:
+          memory: 800Mi
+    ingress:
+      enabled: true
+      hostname: cnom.mpgvprhck01erpccsm01.com
+      ingressClass: OAM-IngressPCCSMClass
+      certificates:
+        enabled: false
+      tls:
+        verifyClientCertificate: optional
+    server:
+      basePath: cnom
+    service:
+      endpoints:
+        api:
+          tls:
+            enforced: optional
+            ca:
+              - name: eric-tm-ingress-controller-cr-client-ca
+                bundle: ca.pem
+                
+eric-probe-event-report-broker:
+  replicaCount: 4
+  resources:
+    probeEventReportBroker:
+      requests:
+        cpu: '1.5'
+      limits:
+        cpu: '3'
+  ebm:
+    enabled: true
+  staticConfig:
+    eventReporting:
+      streamConsumer:
+        - name: Central-CNOM
+          address: 10.99.86.76       ##Need to update CNOM 
+          port: 8090
+          domain:
+            - "pc-sm"
+  enabled: true
+  env:
+    deployment_type: "pcc"
+eric-pc-pm-init:
+  resources:
+    pmInit:
+      limits:
+        cpu: 50m
+#cnom-loadBalancer-service:
+#  loadBalancerIP: 2401:4900:54:e00::13c1
+#  annotations:
+#    metallb.universe.tf/address-pool: smf-oam
+#    metallb.universe.tf/allow-shared-ip: smf-oam
+#  enabled: true
+eric-pc-controller-ldap-admin-creds:
+  adminCredentials:
+    adminuser: day0
+    adminpasswd: "$6$9KSoFzw34W0SpSE5$m/sKCrvg2090SFqY/jxAD6ZMZ2hHmGJsqBhiSJXzRhDcBRh.kQCRzC9tqsFznOfohE6RugpZks4ugiGXZVepP0"
+    
+eric-probe-virtual-tap-broker:
+  enabled: false
+  
+snmp-alarm-provider-secret-creation:
+  enabled: false
+  
+eric-pc-kvdb-rd-operator:
+  security:
+    policyName: restricted-pod-security-policy
+  resources:
+    operator:
+      limits:
+        memory: 512Mi
+      requests:
+        memory: 512Mi
+        
+eric-pc-kvdb-rd-server:
+  security:
+    policyName: restricted-pod-security-policy
+  resources:
+    node:
+      requests: {}
+      limits:
+        cpu: '2'
+        memory: 5Gi
+  numberOfMaster: 52
+  replicationFactor: 1
+  
+eric-pm-resource-monitor:
+  resources:
+    pmrm:
+      requests:
+        memory: 128Mi
+eric-lcm-upgrade-sequencer:
+  enabled: true
+  resources:
+    eric-lcm-upgrade-sequencer:
+      limits:
+        memory: 2000Mi
+      requests:
+        memory: 2000Mi
